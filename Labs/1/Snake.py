@@ -5,7 +5,7 @@ HEIGHT = 10
 
 
 def isValid(snake, redApples):
-    # if the snake is touching itself
+    # if the snake is touching itself - во 2 дел се брише и е зелена
     if len(snake) != len(set(snake)):
         return False
     # if it is touching a red apple
