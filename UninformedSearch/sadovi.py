@@ -46,6 +46,15 @@ class Container(Problem):
             d_liquid = min(j1, c0 - j0)
             successors["Preturi od J1 vo J0"] = (j0 + d_liquid, j1 - d_liquid)
 
+        # napolni j0
+        if j0 < c0:
+            successors["Napolni go sadot J0"] = (c0, j1)
+
+        # napolni j1
+
+        if j1 < c1:
+            successors["Napolni go sadot J1"] = (j0, c1)
+
         return successors
 
     def actions(self, state):
@@ -62,7 +71,6 @@ if __name__ == '__main__':
     capacities = (15, 5)
     initial = (5, 5)
     goal = (10, 0)
-
 
     problem = Container(capacities, initial, goal)
 
