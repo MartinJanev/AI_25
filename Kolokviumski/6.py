@@ -455,39 +455,46 @@ class Balls(Problem):
         super().__init__(initial)
         self.no_balls = no_balls
         self.size = size
-        self.goal = (size // 2, size - 1)
+        self.goal = (size // 2, size - 1)  # middle column, highest row
 
     def successor(self, state):
-        successor = {}
+        successors = {}
+
         balls = state
+        # up-left, up-right, down-left, down-right, left, right
         moves = ["Gore Levo:", "Gore Desno:", "Dolu Levo:", "Dolu Desno:", "Levo:", "Desno:"]
-        coords1 = [(-2, 2), (2, 2), (-2, -2), (2, -2), (-2, 0), (2, 0)]
-        between1 = [(-1, +1), (1, 1), (-1, -1), (1, -1), (-1, 0), (1, 0)]
-        for i in range(0, len(balls)):
-            for move, coords, between in zip(moves, coords1, between1):
-                current_balls = [list(ball) for ball in balls]
+        coords_jump = [(-2, 2), (2, 2), (-2, -2), (2, -2), (-2, 0), (2, 0)]
+        coords_jumped_ball = [(-1, 1), (1, 1), (-1, -1), (1, -1), (-1, 0), (1, 0)]
 
-                new_ball = (current_balls[i][0] + coords[0], current_balls[i][1] + coords[1])
+        for i in range(len(balls)):
+            for move, coord, between in zip(moves, coords_jump, coords_jumped_ball):
+                curr_balls = [list(ball) for ball in balls]  # get all balls
+                new_pos = (curr_balls[i][0] + coord[0], curr_balls[i][1] + coord[1])  # move the i-th ball
 
-                if self.is_valid(new_ball):
-                    ball_in_between = [current_balls[i][0] + between[0], current_balls[i][1] + between[1]]
+                if self.is_valid(new_pos):  # check if the new position is valid
+                    # find the coordinate of the jumped ball
+                    jumped = [curr_balls[i][0] + between[0], curr_balls[i][1] + between[1]]
 
-                    if ball_in_between in current_balls:
-                        x, y = current_balls[i]
-                        current_balls[i] = new_ball
-                        current_balls = [tuple(ball) for ball in current_balls if ball != ball_in_between]
-                        successor[f"{move} (x={x},y={y})"] = tuple(current_balls)
+                    if jumped in curr_balls:  # check if the jumped ball is in the list of balls
+                        # get the index of the jumped ball
+                        x, y = curr_balls[i]
+                        # new coordinate is the new position
+                        curr_balls[i] = new_pos
+                        # add the balls that are not jumped
+                        curr_balls = [tuple(ball) for ball in curr_balls if ball != jumped]
+                        successors[f"{move} (x={x},y={y})"] = tuple(curr_balls)
 
-        return successor
+        return successors
 
     def is_valid(self, node):
         x, y = node
-        if x < 0 or x > size or y < 0 or y > size or node in no_balls:
+        # if the ball is out of bounds or is in the no_balls
+        if x < 0 or x > self.size or y < 0 or y > self.size or node in self.no_balls:
             return False
         return True
 
     def actions(self, state):
-        return self.successor(state)
+        return self.successor(state).keys()
 
     def result(self, state, action):
         return self.successor(state)[action]
@@ -497,18 +504,21 @@ class Balls(Problem):
 
 
 if __name__ == '__main__':
-    size = int(input())
-    num_of_balls = int(input())
-    balls = tuple()
-    for _ in range(num_of_balls):
-        balls += (tuple(map(int, input().split(','))),)
+    n = int(input())
+    valid_balls = int(input())
+    balls = ()
+    for _ in range(valid_balls):
+        x, y = (int(coord) for coord in input().split(","))
+        balls += ((x, y),)
 
-    num_of_no_balls = int(input())
+    not_valid = int(input())
     no_balls = tuple()
-    for _ in range(num_of_no_balls):
-        no_balls += (tuple(map(int, input().split(','))),)
 
-    balls_problem = Balls(balls, no_balls, size)
-    balls_solution = breadth_first_graph_search(balls_problem)
-    if balls_solution is not None:
-        print(balls_solution.solution())
+    for _ in range(not_valid):
+        x, y = (int(coord) for coord in input().split(","))
+        no_balls += ((x, y),)
+
+    problem = Balls(balls, no_balls, n)
+    solution = breadth_first_graph_search(problem)
+    if solution is not None:
+        print(solution.solution())

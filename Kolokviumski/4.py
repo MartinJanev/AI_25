@@ -372,18 +372,24 @@ class Squares(Problem):
         return True
 
     def successor(self, state):
-            succ = {}
-            directions = [("gore", 0, 1), ("dolu", 0, -1), ("levo", -1, 0), ("desno", 1, 0)]
+        succ = {}
 
-            for i, (x, y) in enumerate(state):
-                for direction, dx, dy in directions:
-                    new_state = list(state)
-                    new_state[i] = (x + dx, y + dy)
-                    if self.check_valid(new_state):
-                        action = f"Pomesti kvadratche {i + 1} {direction}"
-                        succ[action] = tuple(new_state)
+        directions = [
+            ("gore", 0, 1),
+            ("dolu", 0, -1),
+            ("levo", -1, 0),
+            ("desno", 1, 0),
+        ]
 
-            return succ
+        for i in range(len(state)):
+            x, y = state[i]
+            for d, dx, dy in directions:
+                newState = list(state)
+                newState[i] = (x + dx, y + dy)
+                if self.check_valid(newState):
+                    action = f"Pomesti kvadratche {i + 1} {d}"
+                    succ[action] = tuple(newState)
+        return succ
 
     def actions(self, state):
         return self.successor(state).keys()

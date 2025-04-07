@@ -451,59 +451,53 @@ def uniform_cost_search(problem):
     return graph_search(problem, PriorityQueue(min, lambda a: a.path_cost))
 
 
-class Tabla(Problem):
+class Tabela(Problem):
 
-    def __init__(self, initial, size):
-        super().__init__(initial, goal=None)
-        self.my_dic = {}
-        ctr = 0
-        for i in range(0, size):
-            for j in range(0, size):
-                self.my_dic[(i, j)] = ctr
-                ctr += 1
-        self.size = size
+    def __init__(self, initial, n, goal=None):
+        super().__init__(initial, goal)
+        self.n = n
 
     def successor(self, state):
         successors = {}
-        around = [(-1, 0), (0, +1), (+1, 0), (0, -1)]
+        dirs = [
+            (-1, 0),
+            (1, 0),
+            (0, -1),
+            (0, 1)
+        ]
 
-        for key in self.my_dic.keys():
-            x,y = key
-            around_blocks = [key]
-            new_state = list(state)
-            for ar in around:
-                new_x = key[0] + ar[0]
-                new_y = key[1] + ar[1]
-                if 0 <= new_x < self.size and 0 <= new_y < self.size:
-                    around_blocks.append((new_x, new_y))
-            for block in around_blocks:
-                new_state[self.my_dic[block]] *= -1
-            successors[f"x: {x}, y: {y}"] = tuple(new_state)
+        for i in range(self.n):
+            for j in range(self.n):
+                around_block = [(i, j)]
+                new_state = list(state)
 
+                for d in dirs:
+                    new_x = i + d[0]
+                    new_y = j + d[1]
+                    if 0 <= new_x < self.n and 0 <= new_y < self.n:
+                        around_block.append((new_x, new_y))
+                for block in around_block:
+                    new_state[block[0] * self.n + block[1]] *= -1
+                successors[f"x: {i}, y: {j}"] = tuple(new_state)
         return successors
 
     def actions(self, state):
-        return self.successor(state)
+        return self.successor(state).keys()
 
     def result(self, state, action):
         return self.successor(state)[action]
 
     def goal_test(self, state):
-        if list(state).__contains__(-1):
-            return False
-        return True
+        return not list(state).__contains__(-1)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     n = int(input())
-    matrix = []
-    l1 = [1 if int(i) == 1 else -1 for i in input().split(",")]
-    ctr = 0
-    # print(l1)
+    table_boolean = [1 if int(i) == 1 else -1 for i in input().split(",")]
 
-    tabla = Tabla(tuple(l1), n)
-    result = breadth_first_graph_search(tabla)
-    if result is None:
-        print("No solution found")
+    tabla = Tabela(tuple(table_boolean), n)
+    res = breadth_first_graph_search(tabla)
+    if res is not None:
+        print(res.solution())
     else:
-        print(result.solution())
+        print('[]')

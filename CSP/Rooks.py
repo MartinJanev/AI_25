@@ -39,8 +39,6 @@ def main():
 
     solution = problem.getSolution()
 
-    # print(solution)
-
     for i in range(n):
         for j in range(n):
             print(solution[(i, j)], end=' ')

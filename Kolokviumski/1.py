@@ -488,17 +488,19 @@ class GhostOnSkates(Problem):
     @staticmethod
     def check_valid(state, walls, n):
         x, y = state
-        return x < n and y < n and state not in walls
+        return 0 <= x < n and 0 <= y < n and state not in walls
 
     def successor(self, state):
         successors = dict()
-        x, y = state
-        for i in range(1, 4):
-            if self.check_valid((x, y + i), self.walls, self.n):
-                successors[f'Gore {i}'] = (x, y + i)
-            if self.check_valid((x + i, y), self.walls, self.n):
-                successors[f'Desno {i}'] = (x + i, y)
 
+        x, y = state
+
+        for i in range(1, 4):
+            if self.check_valid((x + i, y), self.walls, n):
+                successors[f"Desno {i}"] = (x + i, y)
+
+            if self.check_valid((x, y + i), self.walls, n):
+                successors[f"Gore {i}"] = (x, y + i)
         return successors
 
     def h(self, node):
@@ -517,4 +519,5 @@ if __name__ == '__main__':
         holes.append(tuple(map(int, input().split(','))))
 
     problem = GhostOnSkates(ghost_pos, holes, n, goal_pos)
+
     print(astar_search(problem).solution())

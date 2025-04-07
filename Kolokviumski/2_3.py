@@ -451,55 +451,58 @@ def uniform_cost_search(problem):
     return graph_search(problem, PriorityQueue(min, lambda a: a.path_cost))
 
 
-def move_pillar(pillars, pillar_index, new_index):
-    if pillar_index != new_index:
-        if not pillars[new_index] or pillars[new_index][-1] > pillars[pillar_index][-1]:
-            new_pillars = [list(p) for p in pillars]
-            new_pillars[new_index].append(new_pillars[pillar_index].pop())
-            new_state = tuple(tuple(p) for p in new_pillars)
-            action = f"MOVE TOP BLOCK FROM PILLAR {pillar_index + 1} TO PILLAR {new_index + 1}"
-            return action, new_state
-    return None, None
-
-
 class Pillars(Problem):
-    def __init__(self, initial, goal=None):
+    def __init__(self, initial, goal):
         super().__init__(initial, goal)
 
-    def actions(self, state):
-        return self.successor(state).keys()
-
-    def result(self, state, action):
-        return self.successor(state)[action]
-
-    def goal_test(self, state):
-        return state == self.goal
-
     def successor(self, state):
-        successors = dict()
+        successors = {}
 
-        pillars = [list(pillar) for pillar in state]
+        for src in range(len(state)):
+            for dest in range(len(state)):
+                # if it is the same pillar OR the source pillar is empty OR the DESTINATION pillar is NOT empty AND the
+                # top block of the SOURCE pillar is GREATER than the top block of the DESTINATION pillar
+                if not (src == dest or not state[src] or (state[dest] and state[src][-1] > state[dest][-1])):
+                    pillars = list(state)
 
-        for index in range(3):
-            if pillars[index]:
-                for new_index in range(3):
-                    action, new_state = move_pillar(pillars, index, new_index)
-                    if action and new_state:
-                        successors[action] = new_state
+                    pillars[dest] = state[dest] + (state[src][-1],)
+                    pillars[src] = state[src][:-1]
+                    successors[f"MOVE TOP BLOCK FROM PILLAR {src + 1} TO PILLAR {dest + 1}"] = tuple(pillars)
 
         return successors
 
 
-if __name__ == '__main__':
+    def result(self, state, action):
+        return self.successor(state)[action]
 
+    def actions(self, state):
+        return self.successor(state).keys()
+
+    def goal_test(self, state):
+        return state == self.goal
+
+
+if __name__ == '__main__':
     initial_state = input().split(";")
     goal_state = input().split(";")
 
     for i in range(len(initial_state)):
-        initial_state[i] = tuple(map(int, initial_state[i].split(","))) if initial_state[i] else ()
-        goal_state[i] = tuple(map(int, goal_state[i].split(","))) if goal_state[i] else ()
+        if not initial_state[i]:
+            initial_state[i] = ()
+        else:
+            state_comps = tuple(int(e) for e in initial_state[i].split(","))
+            initial_state[i] = tuple(map(int, state_comps))
 
-    problem = Pillars(tuple(initial_state), tuple(goal_state))
+        if not goal_state[i]:
+            goal_state[i] = ()
+        else:
+            goal_comp = tuple(int(e) for e in goal_state[i].split(","))
+            goal_state[i] = tuple(map(int, goal_comp))
+
+    initial_state = tuple(initial_state)
+    goal_state = tuple(goal_state)
+
+    problem = Pillars(initial_state, goal_state)
     solution = breadth_first_graph_search(problem)
-    print("Number of actions:", len(solution.solution()))
+    print("Number of action", len(solution.solution()))
     print(solution.solution())

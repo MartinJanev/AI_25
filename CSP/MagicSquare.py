@@ -25,7 +25,7 @@ def main():
 
     solution = problem.getSolution()
     # for clearer output
-    print(solution)
+    # print(solution)
     for row in range(4):
         for col in range(4):
             print(solution[(row, col)], end="\t")
