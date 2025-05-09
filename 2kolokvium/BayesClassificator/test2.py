@@ -1,6 +1,6 @@
 import csv
 
-from sklearn.naive_bayes import CategoricalNB, GaussianNB
+from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import OrdinalEncoder
 
 
@@ -20,7 +20,10 @@ def main():
 
     encoder = OrdinalEncoder()
     X = [row[:-1] for row in data]
+    # Convert all elements in X to integers for proper encoding
     X = [[int(a) for a in row] for row in X]
+
+    # Learn the mapping of categories to numerical values
     encoder.fit(X)
 
     X_encoded = encoder.transform(X)
@@ -40,7 +43,8 @@ def main():
     # fit the classifier
 
     classifier = GaussianNB()
-
+    # fit function takes two arguments: the data and the labels
+    # essentially, we are training the classifier to learn the mapping between the data and the labels
     classifier.fit(train_X, train_Y)
 
     # predict the test data
@@ -61,6 +65,7 @@ def main():
     data_read = data_read.split(',')
     print(data_read)
 
+    data_read = [int(value) for value in data_read]  # Convert to numeric values
     pred_read = classifier.predict([data_read])[0]
     print(pred_read)
 
