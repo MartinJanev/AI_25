@@ -1,4 +1,5 @@
 import os
+
 os.environ['OPENBLAS_NUM_THREADS'] = '1'
 
 from dataset_script import dataset
@@ -15,8 +16,8 @@ def main():
     for row in dataset:
         new_row = []
         new_row.append(row[0] + row[-2])  # Збир на првата и последната хемиска карактеристика
-        new_row.extend(row[1:-2])         # Средните карактеристики
-        new_row.append(row[-1])           # Класата
+        new_row.extend(row[1:-2])  # Средните карактеристики
+        new_row.append(row[-1])  # Класата
         dataset_new.append(new_row)
 
     dataset = dataset_new
@@ -72,6 +73,8 @@ def main():
     acc1 = sum(1 for true, pred in zip(test_Y, predY1) if true == pred) / len(test_Y)
     acc2 = sum(1 for true, pred in zip(test_Y, predY2) if true == pred) / len(test_Y)
 
+    print("Broj na podatoci vo train se: " + str(len(train)))
+    print("Broj na podatoci vo test se: " + str(len(test)))
     print("Tochnost so zbir na koloni:", acc1)
     print("Tochnost so zbir na koloni i skaliranje:", acc2)
 

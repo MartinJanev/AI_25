@@ -39,8 +39,8 @@ class Game:
         return self.grid[x][y] == "."
 
     def rm_point(self, player):
-        if self.is_point(player.x, player.y):
-            self.grid[player.x][player.y] = "#"
+        if self.is_point(player.x, player.Y):
+            self.grid[player.x][player.Y] = "#"
 
     def has_points(self):
         for row in self.grid:
