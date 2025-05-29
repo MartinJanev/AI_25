@@ -120,20 +120,20 @@ def recursive_best_first_search(problem, h=None):
         if len(successors) == 0:
             return None, infinity
         for s in successors:
-            s.f = max(s.path_cost + h(s), node.f)
+            s.scale = max(s.path_cost + h(s), node.scale)
         while True:
             # Подреди ги според најниската f вредност
-            successors.sort(key=lambda x: x.f)
+            successors.sort(key=lambda x: x.scale)
             best = successors[0]
-            if best.f > flimit:
-                return None, best.f
+            if best.scale > flimit:
+                return None, best.scale
             if len(successors) > 1:
-                alternative = successors[1].f
+                alternative = successors[1].scale
             else:
                 alternative = infinity
-            result, best.f = RBFS(problem, best, min(flimit, alternative))
+            result, best.scale = RBFS(problem, best, min(flimit, alternative))
             if result is not None:
-                return result, best.f
+                return result, best.scale
 
     node = Node(problem.initial)
     node.f = h(node)

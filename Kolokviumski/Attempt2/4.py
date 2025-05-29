@@ -1,5 +1,8 @@
-from sklearn.metrics import accuracy_score
-from sklearn.tree import DecisionTreeClassifier
+import os
+
+os.environ['OPENBLAS_NUM_THREADS'] = '1'
+
+from sklearn.ensemble import RandomForestClassifier
 
 dataset = [[180.0, 23.6, 25.2, 27.9, 25.4, 14.0, 'Roach'],
            [12.2, 11.5, 12.2, 13.4, 15.6, 10.4, 'Smelt'],
@@ -161,58 +164,42 @@ dataset = [[180.0, 23.6, 25.2, 27.9, 25.4, 14.0, 'Roach'],
            [145.0, 22.0, 24.0, 25.5, 25.0, 15.0, 'Perch'],
            [1100.0, 40.1, 43.0, 45.5, 27.5, 16.3, 'Perch']]
 
-if __name__ == '__main__':
-    P = int(input())
-    C = input()
-    L = int(input())
 
-    split = int(P * len(dataset) / 100)
+def remove(dataset, index):
+    return [row[:index] + row[index + 1:] for row in dataset]
 
-    train_set = dataset[:split]
-    train_X = [row[:-1] for row in train_set]
-    train_Y = [row[-1] for row in train_set]
-    test_set = dataset[split:]
-    test_X = [row[:-1] for row in test_set]
-    test_Y = [row[-1] for row in test_set]
 
-    model_params = {
-        'criterion': C,
-        'max_leaf_nodes': L,
-        'random_state': 0
-    }
+def main():
+    global dataset
+    index = int(input())
 
-    model1 = DecisionTreeClassifier(**model_params)
-    model1.fit(train_X, train_Y)
+    dataset = remove(dataset, index)
+    num_trees = int(input())
+    criterion = input()
+    line = input().strip().split(" ")
 
-    acc1 = model1.score(test_X, test_Y)
+    line = [line[i] for i in range(len(line)) if i != index]
 
-    models = []
-    # Train a separate model for each class - 'Perch', 'Roach', 'Bream'
-    for class_ in ['Perch', 'Roach', 'Bream']:
-        model = DecisionTreeClassifier(**model_params)
-        model.fit(train_X, [1 if label == class_ else 0 for label in train_Y])
-        models.append((class_, model))
+    spl = int(0.85 * len(dataset))
 
-    count2 = 0
-    # It is correct if the apropriate model predicts 1 and the others predict 0
-    for row_x, label in zip(test_X, test_Y):
-        all_models_predict_correct = True
-        for class_, model in models:
-            pred = model.predict([row_x])[0]
-            # Here is checked the model for the class of check
-            if pred == label:
-                if pred != 1:
-                    all_models_predict_correct = False
-                    break
-            else:
-                # Here are checked the other models
-                if pred != 0:
-                    all_models_predict_correct = False
-                    break
-        if all_models_predict_correct:
-            count2 += 1
+    train_set = dataset[:spl]
+    test_set = dataset[spl:]
 
-    acc2 = count2 / len(test_X)
+    train_X, train_y = [row[:-1] for row in train_set], [row[-1] for row in train_set]
+    test_X, test_y = [row[:-1] for row in test_set], [row[-1] for row in test_set]
 
-    print(acc1)
-    print(acc2)
+    model = RandomForestClassifier(random_state=0,
+                                   criterion=criterion,
+                                   n_estimators=num_trees)
+    model.fit(train_X, train_y)
+
+    prediction = model.predict(test_X)
+
+    acc = sum(1 for true, pred in zip(test_y, prediction) if true == pred) / len(test_y)
+
+    print(f"Accuracy: {acc}")
+    print(model.predict([line])[0])
+    print(model.predict_proba([line])[0])
+
+
+main()

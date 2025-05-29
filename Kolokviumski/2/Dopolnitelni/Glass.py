@@ -7,16 +7,18 @@ def most_imprtant_feature(train_X, train_Y, L):
     model.fit(train_X, train_Y)
     feat_imps = list(model.feature_importances_)  # list of importances of each feature in the model
 
+    # For the more curious:
+    # Suppose we want to extract the 'k' most important features.
+
     # feat_imps = enumerate(feat_imps)
-    # sorted_feat_imps = sorted(feat_imps, key=lambda x: x[1], reverse=True)
-    #
-    # index = sorted_feat_imps[0][0]
+    # feat_imps = sorted(feat_imps, key=lambda x: x[1], reverse=True)
+    # feat_imps_k = [index for index, importance in feat_imps[:k]]
 
     index = feat_imps.index(max(feat_imps))
     return index
 
 
-def f(train_X, test_X, index):
+def scale(train_X, test_X, index):
     train_X_modified = [row[:index] + row[index + 1:] for row in train_X]
     # train_X_modified = [[el for ind, el in enumerate(row) if ind != index]for row in train_X]
     test_X_modified = [row[:index] + row[index + 1:] for row in test_X]
@@ -45,9 +47,9 @@ if __name__ == '__main__':
     test_X = [row[:-1] for row in test_set]
     test_Y = [row[-1] for row in test_set]
 
-    index = most_imprtant_feature(train_X, test_X, L)
+    index = most_imprtant_feature(train_X, train_Y, L)
 
-    train_X_scaled, test_X_scaled = f(train_X, test_X, index)
+    train_X_scaled, test_X_scaled = scale(train_X, test_X, index)
 
     model = RandomForestClassifier(random_state=0, n_estimators=D, criterion='gini')
     model.fit(train_X, train_Y)
